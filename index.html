@@ -162,6 +162,17 @@ footer { color: var(--muted); font-size: .82rem; margin-top: 28px; max-width: 75
 .ctl[hidden] { display: none; }
 .chart-head .seg button { padding: 6px 12px; min-height: 36px; }
 .chart-foot { display: flex; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; align-items: baseline; margin-top: 8px; }
+.mini { margin-top: 12px; border: 1px solid var(--line); border-left: 4px solid var(--tie); border-radius: 10px; padding: 12px 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; align-items: center; cursor: pointer; background: var(--bg); }
+.mini.flip { border-left-color: var(--flip); }
+.mini.hint { cursor: default; border-left-color: var(--line); grid-template-columns: 1fr; color: var(--muted); }
+.mini:not(.hint):hover { border-color: var(--muted); }
+.mini .mt { font-family: var(--display); text-transform: uppercase; font-size: 1.35rem; line-height: 1.1; letter-spacing: .02em; }
+.mini .mm { color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.mini .ms { font-family: var(--display); font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.mini .full { border: 0; background: var(--ink); color: var(--bg); border-radius: 8px; padding: 10px 16px; min-height: 42px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.mini .linkish { border: 0; background: none; padding: 0; color: var(--ink); font: inherit; text-decoration: underline; cursor: pointer; }
+.mini .side { display: grid; gap: 6px; justify-items: end; }
+@media (max-width: 560px) { .mini { grid-template-columns: 1fr; } .mini .side { justify-items: start; grid-auto-flow: column; align-items: center; justify-content: space-between; } }
 .chart-about { color: var(--muted); font-size: .88rem; margin: 0; max-width: 72ch; }
 </style>
 </head>
@@ -192,6 +203,7 @@ footer { color: var(--muted); font-size: .82rem; margin-top: 28px; max-width: 75
       <p class="chart-about" id="chart-about"></p>
       <div class="legend"><span><i style="background:var(--flip)"></i>Flipped lead</span><span><i style="background:var(--tie)"></i>Broke tie</span><span><i style="background:transparent;border:2px solid var(--accent)"></i><span id="post-legend">Playoffs</span></span></div>
     </div>
+    <div id="mini" class="mini hint" aria-live="polite"></div>
   </section>
 
   <div class="controls" role="search">
@@ -331,7 +343,7 @@ const weekLabel = p => p.lg === "cfb" ? (p.type === "POST" ? "Bowl" : "Week " + 
 const when = p => p.qtr === "OT" ? "OT" + (p.lg === "nfl" ? " " + p.clock : "") : "Q" + p.qtr + " " + p.clock;
 const timeLeft = p => p.qtr === "OT" ? -1e4 + (p.lg === "nfl" ? (p.gsr ?? 0) : 0) : p.gsr;
 
-const state = { view: "field", lg: "nfl", sort: "swing", team: "", thrower: "", conf: "", season: "", sit: "", post: false, q: "", player: null, shown: 40 };
+const state = { sel: null, view: "field", lg: "nfl", sort: "swing", team: "", thrower: "", conf: "", season: "", sit: "", post: false, q: "", player: null, shown: 40 };
 const cur = () => LG[state.lg];
 const fill = (el, first, vals, label = v => v) => { el.innerHTML = `<option value="">${first}</option>` + vals.map(v => `<option value="${esc(v)}">${esc(label(v))}</option>`).join(""); };
 
@@ -360,7 +372,7 @@ function setupLeague() {
 
 function switchLeague(lg, keepHash) {
   if (state.lg === lg && $("#stats").innerHTML) return;
-  Object.assign(state, { lg, team: "", thrower: "", conf: "", season: "", sit: "", post: false, q: "", player: null, shown: 40 });
+  Object.assign(state, { sel: null, lg, team: "", thrower: "", conf: "", season: "", sit: "", post: false, q: "", player: null, shown: 40 });
   $("#q").value = ""; $("#post").checked = false;
   $("#sit").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.v === ""));
   setupLeague(); render();
@@ -420,14 +432,15 @@ function render() {
 }
 
 const VIEWS = {
-  field: ["The return, on the field", "Each pick-6 sits where the ball was caught; the gold end zone is where it scored. Higher up means a bigger win-probability swing. Tap a dot to open the play."],
-  season: ["Every play, by season", "Year along the bottom, win-probability swing going up. Tap a dot to open the play."],
-  clock: ["When in the game it happened", "Kickoff to overtime, left to right. The late-game corner is where the biggest swings live. Tap a dot to open the play."],
+  field: ["The return, on the field", "Each pick-6 sits where the ball was caught; the gold end zone is where it scored. Higher up means a bigger win-probability swing. Tap a dot to see it below the chart."],
+  season: ["Every play, by season", "Year along the bottom, win-probability swing going up. Tap a dot to see it below the chart."],
+  clock: ["When in the game it happened", "Kickoff to overtime, left to right. The late-game corner is where the biggest swings live. Tap a dot to see it below the chart."],
 };
 function dotSVG(p, x, y, r, on, chalk) {
-  const col = p.sit === "flip" ? "var(--flip)" : "var(--tie)";
+  const col = p.sit === "flip" ? "var(--flip)" : "var(--tie)", sel = state.sel === p.hash;
+  if (sel) return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r + 6}" fill="none" stroke="${chalk ? "#fff" : "var(--ink)"}" stroke-width="2"/><circle class="dot" data-h="${p.hash}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r + 2}" fill="${col}" stroke="${chalk ? "#fff" : "var(--surface)"}" stroke-width="2"><title>${esc(p.def)}</title></circle>`;
   const stroke = p.type === "POST" ? "var(--accent)" : chalk ? "var(--chalk)" : "none";
-  return `<circle class="dot" data-h="${p.hash}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${col}" fill-opacity="${on ? .85 : .1}" stroke="${stroke}" stroke-opacity="${on ? 1 : .12}" stroke-width="${p.type === "POST" ? 2 : .8}"><title>${esc(p.def)} · ${esc(cur().short(p))} ${p.season} · ${pts(p.swing)}</title></circle>`;
+  return `<circle class="dot" data-h="${p.hash}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${col}" fill-opacity="${on ? (state.sel ? .6 : .85) : .1}" stroke="${stroke}" stroke-opacity="${on ? 1 : .12}" stroke-width="${p.type === "POST" ? 2 : .8}"><title>${esc(p.def)} · ${esc(cur().short(p))} ${p.season} · ${pts(p.swing)}</title></circle>`;
 }
 function swingGrid(W, H, L, R, T, B, ymax, y) {
   let g = "";
@@ -441,7 +454,7 @@ function drawScatter(visible) {
   $("#post-legend").textContent = state.lg === "cfb" ? "Bowl" : "Playoffs";
   const W = Math.max(320, Math.round(svg.clientWidth || 1000)), small = W < 600, sm = small ? .8 : 1;
   const ymax = Math.max(0.7, Math.ceil(Math.max(...D.map(p => p.swing)) * 10) / 10);
-  const ordered = [...D].sort((a, b) => visible.has(a.id) - visible.has(b.id));
+  const ordered = [...D].sort((a, b) => (visible.has(a.id) - visible.has(b.id)) || ((a.hash === state.sel) - (b.hash === state.sel)));
   let H, g = "";
   if (view === "field") {
     const ez = 10, sx = W / 120, X = yd => (yd + ez) * sx;
@@ -455,7 +468,8 @@ function drawScatter(visible) {
     for (let yd = 1; yd < 100; yd++) if (yd % 5) [H * .36, H * .64].forEach(hy => g += `<line x1="${X(yd)}" x2="${X(yd)}" y1="${hy - 3}" y2="${hy + 3}" stroke="var(--chalk)" stroke-opacity=".35"/>`);
     for (let yd = 10; yd <= 90; yd += 10) { const n = yd <= 50 ? yd : 100 - yd; const st = `fill:var(--chalk);fill-opacity:.8;font-family:var(--display);font-weight:700;font-size:${fs}px`; g += `<text x="${X(yd)}" y="${H - 6}" text-anchor="middle" style="${st}">${n}</text><text x="${X(yd)}" y="14" text-anchor="middle" style="${st}" transform="rotate(180 ${X(yd)} 10)">${n}</text>`; }
     for (let v = .2; v < ymax; v += .2) g += `<text x="${X(100) - 4}" y="${y(v) + 4}" text-anchor="end" style="fill:var(--chalk);fill-opacity:.75;font-size:10px">+${Math.round(v * 100)}</text>`;
-    const r = small ? 3.6 : 5;
+    const r = small ? 3.6 : 5, sp = D.find(p => p.hash === state.sel);
+    if (sp && sp.yds != null) g += `<line x1="${X(100 - sp.yds)}" x2="${X(100)}" y1="${y(sp.swing)}" y2="${y(sp.swing)}" stroke="#fff" stroke-width="2.5" stroke-dasharray="6 5"/><polygon points="${X(100)},${y(sp.swing)} ${X(100) - 9},${y(sp.swing) - 5} ${X(100) - 9},${y(sp.swing) + 5}" fill="#fff"/>`;
     g += ordered.filter(p => p.yds != null).map(p => dotSVG(p, X(100 - p.yds), y(p.swing), p.type === "POST" ? r + 1.2 : r, visible.has(p.id), true)).join("");
     svg.setAttribute("aria-label", "Football field chart: each pick-6 at the spot it was intercepted, height is its win-probability swing. Tap a dot to open the play.");
   } else if (view === "season") {
@@ -478,6 +492,25 @@ function drawScatter(visible) {
   }
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.innerHTML = g;
+  renderMini(visible);
+}
+function renderMini(visible) {
+  const m = $("#mini"), p = state.sel ? byHash[state.sel] : null;
+  if (!p || p.lg !== state.lg) {
+    const top = cur().data.filter(x => !visible || visible.has(x.id)).sort((a, b) => b.swing - a.swing)[0];
+    m.className = "mini hint";
+    m.innerHTML = top ? `<div>Tap any dot to see that play here. Biggest swing in this view: <button type="button" class="linkish" data-sel="${top.hash}">${esc(top.def)}, ${pts(top.swing)}</button>.</div>` : `<div>No plays match these filters.</div>`;
+    return;
+  }
+  const L = LG[p.lg];
+  m.className = "mini " + p.sit;
+  m.dataset.open = p.hash;
+  m.innerHTML = `<div>
+      <div class="mt">${esc(p.def)}${p.yds != null ? ", " + p.yds + "-yard" : ""} pick-6</div>
+      <div class="mm"><span>${esc(L.short(p))}</span><span>${p.season} · ${weekLabel(p)}</span><span>${when(p)}</span>${p.qb ? `<span>off ${esc(p.qb)}</span>` : ""}</div>
+      <div class="mm"><span>${p.before} → ${p.after}</span><span>win prob ${pct(p.wp0)} → ${pct(p.wp1)}</span><span>No. ${p.rank} all-time</span>${p.res === "L" ? "<span>still lost</span>" : ""}</div>
+    </div>
+    <div class="side"><span class="ms">${pts(p.swing)}</span><button type="button" class="full" data-open="${p.hash}">Full info</button></div>`;
 }
 
 function board(kind, el, min, limit) {
@@ -510,6 +543,7 @@ function curveSVG(p) {
 
 function openPlay(p, push = true) {
   if (p.lg !== state.lg) switchLeague(p.lg, true);
+  if (state.sel !== p.hash) { state.sel = p.hash; drawScatter(new Set(filtered().map(x => x.id))); }
   const L = LG[p.lg];
   $("#d-title").textContent = `${p.def}${p.yds != null ? ", " + p.yds + "-yard" : ""} pick-6`;
   $("#d-sub").textContent = `${L.name(p)} ${p.lg === "cfb" && p.neutral ? "vs" : p.home ? "vs" : "at"} ${L.oppName(p)} · ${p.season} ${weekLabel(p)} · ${when(p)}`;
@@ -558,6 +592,10 @@ document.addEventListener("click", e => {
   if (vb) { state.view = vb.dataset.view; try { localStorage.setItem("flipsix-view", state.view); } catch (err) {} drawScatter(new Set(filtered().map(p => p.id))); return; }
   const lb = e.target.closest(".league button");
   if (lb) { switchLeague(lb.dataset.l); return; }
+  const pick = e.target.closest("#scatter [data-h], [data-sel]");
+  if (pick) { state.sel = pick.dataset.h || pick.dataset.sel; drawScatter(new Set(filtered().map(p => p.id))); return; }
+  const op = e.target.closest("[data-open]");
+  if (op && byHash[op.dataset.open]) { openPlay(byHash[op.dataset.open]); return; }
   const h = e.target.closest("[data-h]");
   if (h && byHash[h.dataset.h]) { openPlay(byHash[h.dataset.h]); return; }
   const b = e.target.closest("[data-kind]");
