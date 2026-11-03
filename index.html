@@ -4,6 +4,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Flip Six</title>
+<meta name="description" content="Every lead-changing pick-6 in the NFL and college football, ranked by how much each one swung the game.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://flipsix.us/">
+<meta property="og:title" content="Flip Six: every lead-changing pick-6">
+<meta property="og:description" content="Every NFL and college pick-6 that broke a tie or flipped the lead, ranked by win-probability swing.">
+<meta property="og:image" content="https://flipsix.us/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@flippicksix">
+<meta name="twitter:title" content="Flip Six: every lead-changing pick-6">
+<meta name="twitter:description" content="Every NFL and college pick-6 that broke a tie or flipped the lead, ranked by win-probability swing.">
+<meta name="twitter:image" content="https://flipsix.us/og.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2314201a'/%3E%3Cpath d='M9 6v21' stroke='%23f4f7f2' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M10 7h14v11l-7-3H10z' fill='%23f5b800'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -162,6 +176,18 @@ footer { color: var(--muted); font-size: .82rem; margin-top: 28px; max-width: 75
 .league button { border: 0; background: transparent; padding: 8px 18px; min-height: 40px; cursor: pointer; font-family: var(--display); text-transform: uppercase; letter-spacing: .06em; font-size: 1rem; font-weight: 600; }
 .league button[aria-pressed="true"] { background: var(--accent); color: #14201a; }
 .ctl[hidden] { display: none; }
+.topbar { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+.toplinks { display: flex; gap: 16px; font-weight: 600; }
+.toplinks a, footer a, .about a { color: var(--ink); text-underline-offset: 3px; }
+.about { margin-top: 32px; padding: 22px 20px; display: grid; gap: 14px; }
+.about h2 { font-size: 1.8rem; }
+.about h3 { font-family: var(--display); text-transform: uppercase; letter-spacing: .03em; font-size: 1.15rem; margin: 6px 0 0; }
+.about p, .about li { max-width: 66ch; margin: 0; }
+.about ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.about .big { font-size: 1.1rem; }
+.updated { color: var(--muted); font-size: .82rem; }
+.links button.copy { border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 8px; padding: 9px 14px; font: inherit; font-weight: 600; cursor: pointer; }
+.links input.copyurl { border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; font: inherit; min-width: 240px; background: var(--bg); color: var(--ink); }
 .chart-head .seg button { padding: 6px 12px; min-height: 36px; }
 .chart-foot { display: flex; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; align-items: baseline; margin-top: 8px; }
 .mini { margin-top: 12px; border: 1px solid var(--line); border-left: 4px solid var(--tie); border-radius: 10px; padding: 12px 14px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 14px; align-items: center; cursor: pointer; background: var(--bg); }
@@ -183,9 +209,12 @@ footer { color: var(--muted); font-size: .82rem; margin-top: 28px; max-width: 75
   <header>
     <h1><span class="flag" aria-hidden="true"></span>Flip Six</h1>
     <p class="kicker">Lead-changing pick-6s</p>
-    <div class="league" role="group" aria-label="League">
-      <button type="button" data-l="nfl" aria-pressed="true">NFL</button>
-      <button type="button" data-l="cfb" aria-pressed="false">College</button>
+    <div class="topbar">
+      <div class="league" role="group" aria-label="League">
+        <button type="button" data-l="nfl" aria-pressed="true">NFL</button>
+        <button type="button" data-l="cfb" aria-pressed="false">College</button>
+      </div>
+      <nav class="toplinks" aria-label="Site"><a href="#about">About</a><a href="https://x.com/flippicksix" target="_blank" rel="noopener">Follow @flippicksix</a></nav>
     </div>
     <p class="lede" id="lede"></p>
     <p class="sublede" id="sublede"></p>
@@ -277,6 +306,26 @@ footer { color: var(--muted); font-size: .82rem; margin-top: 28px; max-width: 75
     </aside>
   </div>
 
+  <section class="panel about" id="about" aria-labelledby="about-title">
+    <h2 id="about-title">Why the Flip Six</h2>
+    <p class="big">Most big plays move a game a little. A lead-changing pick-6 moves it twice in about ten seconds: the offense loses a drive that might have scored, and the defense scores instead. One throw, and the team that was losing is winning.</p>
+    <p>It's rare, too. The NFL averages about 14 a season, fewer than one a week across the whole league, and roughly two out of three teams that get one go on to win the game.</p>
+    <h3>What counts</h3>
+    <ul>
+      <li>An interception returned for a touchdown by the defense.</li>
+      <li>Before the snap, the defense was trailing or tied.</li>
+      <li>After the extra point or two-point try, the defense leads.</li>
+      <li>College adds one rule: pick-6s thrown while either team was still scoreless aren't included.</li>
+    </ul>
+    <h3>How the ranking works</h3>
+    <p>Every play is ranked by its win-probability swing: the defense's chance of winning just before the snap, compared with just after the extra point. Kiko Alonso's 60-yard return for Miami in a 24-24 game with 1:13 left took the Dolphins from 27% to 95%, a 68-point swing and the biggest in the NFL since 1999.</p>
+    <p>Win probability comes from open models built on decades of play-by-play. Given the score, the clock, field position and down and distance, they estimate how often a team in that spot goes on to win. The NFL model leaves out betting lines, so the numbers reflect the game situation alone.</p>
+    <h3>The data</h3>
+    <p>NFL plays come from <a href="https://nflverse.nflverse.com/" target="_blank" rel="noopener">nflverse</a> play-by-play (nflfastR), 1999 to present. College plays come from <a href="https://cfbfastr.sportsdataverse.org/" target="_blank" rel="noopener">cfbfastR</a> and the SportsDataverse, covering games with at least one FBS team. Both are free, community-built projects, and this site wouldn't exist without them.</p>
+    <h3>Follow along</h3>
+    <p>New Flip Sixes as they happen, plus On This Day throwbacks, on X at <a href="https://x.com/flippicksix" target="_blank" rel="noopener">@flippicksix</a>.</p>
+  </section>
+
   <footer id="footer"></footer>
 </div>
 
@@ -330,6 +379,7 @@ const LG = {
     lede: "Every NFL interception returned for a touchdown by a defense that was trailing or tied, and led once the extra point was done. Ranked by how much the play moved the defense's win probability.",
     since: "plays since 1999", postLabel: "Playoffs only", search: "e.g. Talib, Stafford",
     defMin: 3, defNote: "Three or more. Tap a name to see their plays.", qbMin: 5, qbNote: "Five or more. Tap a name to see every one.",
+    updated: "NFL data through 2026 Week 8",
     footer: "Data: nflverse play-by-play (nflfastR), 1999 to present, regular season and playoffs. Win probability is the nflverse model without the Vegas line: before the interception snap, and after the extra point or 2-point try. Team codes are current franchises, so the St. Louis Rams appear as LA, the San Diego Chargers as LAC and the Oakland Raiders as LV. Video buttons search YouTube; not every play has footage.",
   },
   cfb: {
@@ -340,6 +390,7 @@ const LG = {
     sub: "For database management purposes, pick-6s thrown while either team was still scoreless have been excluded.",
     since: "plays since 2004", postLabel: "Bowls only", search: "e.g. Wiggins, Foles",
     defMin: 2, defNote: "Two or more. Tap a name to see their plays.", qbMin: 2, qbNote: "Two or more. Tap a name to see every one.",
+    updated: "College data: 2004–2022 seasons",
     footer: "Data: cfbfastR / SportsDataverse play-by-play with its win-probability model, games with at least one FBS team. Seasons 2004–2010, 2012–2019 and 2021–2022 (2004, 2005 and 2010 are partial; 2011, 2020 and 2023 on are not included yet). Win probability after the play is taken from the next play in the game. Highlights links are full-game reels when the source has one.",
   },
 };
@@ -371,7 +422,7 @@ function setupLeague() {
   $("#post-label").textContent = L.postLabel;
   $("#q").placeholder = L.search;
   $("#b-def-note").textContent = L.defNote; $("#b-qb-note").textContent = L.qbNote;
-  $("#footer").textContent = L.footer;
+  $("#footer").innerHTML = `<p>${esc(L.footer)}</p><p class="updated">${esc(L.updated)} · Flip Six is an independent fan project, not affiliated with the NFL, the NCAA or any team. · <a href="https://x.com/flippicksix" target="_blank" rel="noopener">@flippicksix</a></p>`;
   board("def", "#b-def", L.defMin, 13); board("qb", "#b-qb", L.qbMin, 14);
 }
 
@@ -577,6 +628,7 @@ function openPlay(p, push = true) {
   if (p.lg === "cfb" && p.highlights) links += `<a href="${esc(p.highlights)}" target="_blank" rel="noopener">Game highlights</a>`;
   if (p.lg === "nfl" && p.pfr) links += `<a href="https://www.pro-football-reference.com/boxscores/${p.pfr}.htm" target="_blank" rel="noopener">Box score (PFR)</a>`;
   if (p.espn) links += `<a href="https://www.espn.com/${p.lg === "nfl" ? "nfl" : "college-football"}/game/_/gameId/${p.espn}" target="_blank" rel="noopener">ESPN game page</a>`;
+  links += `<button type="button" class="copy" data-copy="https://flipsix.us/#${p.hash}">Copy link</button>`;
   $("#d-links").innerHTML = links;
   const d = $("#dlg");
   if (!d.open) { try { d.showModal(); } catch (e) { d.setAttribute("open", ""); } }
@@ -593,6 +645,13 @@ $("#d-close").addEventListener("click", closePlay);
 $("#dlg").addEventListener("click", e => { if (e.target === $("#dlg")) closePlay(); });
 
 document.addEventListener("click", e => {
+  const cp = e.target.closest("[data-copy]");
+  if (cp) {
+    const url = cp.dataset.copy;
+    const fallback = () => { const i = document.createElement("input"); i.className = "copyurl"; i.readOnly = true; i.value = url; i.setAttribute("aria-label", "Link to this play"); cp.replaceWith(i); i.focus(); i.select(); };
+    try { navigator.clipboard.writeText(url).then(() => { cp.textContent = "Link copied"; setTimeout(() => { cp.textContent = "Copy link"; }, 1800); }, fallback); } catch (err) { fallback(); }
+    return;
+  }
   const vb = e.target.closest("#views button");
   if (vb) { state.view = vb.dataset.view; try { localStorage.setItem("flipsix-view", state.view); } catch (err) {} drawScatter(new Set(filtered().map(p => p.id))); return; }
   const lb = e.target.closest(".league button");
