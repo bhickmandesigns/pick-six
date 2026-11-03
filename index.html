@@ -629,6 +629,7 @@ function openPlay(p, push = true) {
   if (p.lg === "nfl" && p.pfr) links += `<a href="https://www.pro-football-reference.com/boxscores/${p.pfr}.htm" target="_blank" rel="noopener">Box score (PFR)</a>`;
   if (p.espn) links += `<a href="https://www.espn.com/${p.lg === "nfl" ? "nfl" : "college-football"}/game/_/gameId/${p.espn}" target="_blank" rel="noopener">ESPN game page</a>`;
   links += `<button type="button" class="copy" data-copy="https://flipsix.us/#${p.hash}">Copy link</button>`;
+  links += `<a href="card.html#${p.hash}" target="_blank" rel="noopener">Make graphic</a>`;
   $("#d-links").innerHTML = links;
   const d = $("#dlg");
   if (!d.open) { try { d.showModal(); } catch (e) { d.setAttribute("open", ""); } }
