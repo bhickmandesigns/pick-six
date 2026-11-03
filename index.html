@@ -50,6 +50,8 @@ button, select, input { font: inherit; color: inherit; }
 header { padding: 32px 0 18px; display: grid; gap: 12px; }
 .flag { display: inline-block; width: 14px; height: 18px; background: var(--accent); margin-right: 10px; vertical-align: baseline; clip-path: polygon(0 0, 100% 0, 100% 100%, 0 70%); }
 .kicker { font-family: var(--display); text-transform: uppercase; letter-spacing: .08em; font-size: 1.15rem; color: var(--accent-ink); margin: -6px 0 0; font-weight: 600; }
+.sublede { max-width: 62ch; color: var(--muted); font-size: .85rem; font-style: italic; margin: -6px 0 0; }
+.sublede:empty { display: none; }
 .lede { max-width: 62ch; color: var(--muted); margin: 0; }
 .stats { display: flex; flex-wrap: wrap; gap: 8px 28px; margin-top: 6px; }
 .stat b { display: block; font-family: var(--display); font-size: 2rem; line-height: 1; }
@@ -186,6 +188,7 @@ footer { color: var(--muted); font-size: .82rem; margin-top: 28px; max-width: 75
       <button type="button" data-l="cfb" aria-pressed="false">College</button>
     </div>
     <p class="lede" id="lede"></p>
+    <p class="sublede" id="sublede"></p>
     <div class="stats" id="stats"></div>
   </header>
 
@@ -333,7 +336,8 @@ const LG = {
     data: CFB,
     name: p => p.team, oppName: p => p.opp,
     short: p => `${p.team} ${p.neutral ? "vs" : p.home ? "vs" : "at"} ${p.opp}`,
-    lede: "Every college interception returned for a touchdown by a defense that was trailing or tied, and led once the extra point was done. Plays where either team was still scoreless don't count. Ranked by how much the play moved the defense's win probability.",
+    lede: "Every college interception returned for a touchdown by a defense that was trailing or tied, and led once the extra point was done. Ranked by how much the play moved the defense's win probability.",
+    sub: "For database management purposes, pick-6s thrown while either team was still scoreless have been excluded.",
     since: "plays since 2004", postLabel: "Bowls only", search: "e.g. Wiggins, Foles",
     defMin: 2, defNote: "Two or more. Tap a name to see their plays.", qbMin: 2, qbNote: "Two or more. Tap a name to see every one.",
     footer: "Data: cfbfastR / SportsDataverse play-by-play with its win-probability model, games with at least one FBS team. Seasons 2004–2010, 2012–2019 and 2021–2022 (2004, 2005 and 2010 are partial; 2011, 2020 and 2023 on are not included yet). Win probability after the play is taken from the next play in the game. Highlights links are full-game reels when the source has one.",
@@ -351,6 +355,7 @@ function setupLeague() {
   const L = cur(), D = L.data;
   document.querySelectorAll(".league button").forEach(b => b.setAttribute("aria-pressed", b.dataset.l === state.lg));
   $("#lede").textContent = L.lede;
+  $("#sublede").textContent = L.sub || "";
   const seasons = [...new Set(D.map(p => p.season))].sort();
   const last = seasons[seasons.length - 1];
   const stats = [[D.length, L.since], [(D.length / seasons.length).toFixed(1), "per season"], [D.filter(p => p.sit === "flip").length, "flipped a lead"], [pct(D.filter(p => p.res === "W").length / D.length), "of pick-6 teams won"]];
